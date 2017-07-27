@@ -4,8 +4,13 @@ cytoscape-fisheye
 
 ## Description
 
-Fisheye view functionality for Cytoscape.js
+Fisheye view functionality for Cytoscape.js.  
 
+Based on the paper:
+```
+Sarkar M, Brown MH. Graphical fisheye views. Communications
+of the ACM 1994;37(12):73–84.
+```
 
 ## Dependencies
 
