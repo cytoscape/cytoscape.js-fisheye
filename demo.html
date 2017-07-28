@@ -48,7 +48,12 @@
 
 					for ( var j = 99; 0 < j; j-- ) {
 
-						edges.push({data: {target: nodes[j].data.id, source: nodes[j-1].data.id }});
+						if (j % 10 !== 0) {
+							edges.push({data: {target: nodes[j].data.id, source: nodes[j-1].data.id }});
+						}
+						if (10 <= j) {
+							edges.push({data: {target: nodes[j-10].data.id, source: nodes[j].data.id}});
+						}
 					}
 
 					return {
@@ -80,15 +85,25 @@
 					elements: elements()
 				});
 
-				cy.nodes().positions((node) => {
-					return {
-						x: Math.floor(Math.parseInt(node.data.id) / 10) * 20,
-						y: (Math.parseInt(node.data.id) % 10 ) * 20
-					}
-				})
+				var reposition = function () {
+					cy.nodes().positions((node) => {
+						return {
+							x: Math.floor(parseInt(node.data('id') % 10)) * 100,
+							y: Math.floor(parseInt(node.data('id') / 10 )) * 100
+						};
+					});
+				};
+				reposition();
 
-				// demo your collection ext
-				cy.elements().fisheye( /* args... */ );
+				cy.on('tapstart', 'node', function (evt) {
+					evt.target.fisheye({
+						animate: true
+					});
+				});
+
+				cy.on('tapend', 'node', function (evt) {
+					reposition();
+				});
 
 			});
 		</script>
