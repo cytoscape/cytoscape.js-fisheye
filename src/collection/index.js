@@ -14,29 +14,32 @@ const fePosition = (node, focusNode, globalBB, opts) => {
   const focusRPos = focusNode.renderedPosition();
   const nodeRPos = node.renderedPosition();
 
-  const dMaxX = Math.abs((focusRPos.x - globalBB.x2));
-  const dMaxY = Math.abs((focusRPos.y - globalBB.y2));
+  let dNormX = Math.abs((nodeRPos.x - focusRPos.x));
+  let dNormY = Math.abs((nodeRPos.y - focusRPos.y));
 
-  let dNormX;
-  if (nodeRPos.x >= focusRPos.x) {
-    dNormX = nodeRPos.x - focusRPos.x;
+  let dMaxX;
+  if (nodeRPos.x <= focusRPos.x) {
+    dMaxX = focusRPos.x - globalBB.x1;
   } else {
-    dNormX = focusRPos.x - nodeRPos.x;
+    dMaxX = globalBB.x2 - focusRPos.x;
   }
 
-  let dNormY;
-  if (nodeRPos.y >= focusRPos.y) {
-    dNormY = nodeRPos.y - focusRPos.y;
+  let dMaxY;
+  if (nodeRPos.y <= focusRPos.y) {
+    dMaxY = focusRPos.y - globalBB.y1;
   } else {
-    dNormY = focusRPos.y - nodeRPos.y;
+    dMaxY = globalBB.y2 - focusRPos.y;
   }
 
   const distortedFactorX = distort(dNormX / dMaxX, 1);
   const distortedFactorY = distort(dNormY / dMaxY, 1);
 
+  let x = focusRPos.x > nodeRPos.x ? focusRPos.x - ( distortedFactorX * dMaxX ) : focusRPos.x + ( distortedFactorX * dMaxX );
+  let y = focusRPos.y > nodeRPos.y ? focusRPos.y - ( distortedFactorY * dMaxY ) : focusRPos.y + ( distortedFactorY * dMaxY );
+
   return {
-    x: ( distortedFactorX * dMaxX ) + focusRPos.x,
-    y: ( distortedFactorY * dMaxY ) + focusRPos.y
+    x: x,
+    y: y
   };
 };
 
