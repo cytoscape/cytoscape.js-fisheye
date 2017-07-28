@@ -39,6 +39,24 @@
 		<script>
 			document.addEventListener('DOMContentLoaded', function(){
 
+				var elements = function () {
+					var nodes = [];
+					var edges = [];
+					for ( var i = 0; i < 100; i++ ) {
+						nodes.push({data: { id: i.toString(), name: i.toString() }});
+					}
+
+					for ( var j = 99; 0 < j; j-- ) {
+
+						edges.push({data: {target: nodes[j].data.id, source: nodes[j-1].data.id }});
+					}
+
+					return {
+						nodes: nodes,
+						edges: edges
+					};
+				};
+
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
 
@@ -59,26 +77,15 @@
 						}
 					],
 
-					elements: {
-						nodes: [
-							{ data: { id: 'j', name: 'Jerry' } },
-							{ data: { id: 'e', name: 'Elaine' } },
-							{ data: { id: 'k', name: 'Kramer' } },
-							{ data: { id: 'g', name: 'George' } }
-						],
-						edges: [
-							{ data: { source: 'j', target: 'e' } },
-							{ data: { source: 'j', target: 'k' } },
-							{ data: { source: 'j', target: 'g' } },
-							{ data: { source: 'e', target: 'j' } },
-							{ data: { source: 'e', target: 'k' } },
-							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'g', target: 'j' } }
-						]
-					}
+					elements: elements()
 				});
+
+				cy.nodes().positions((node) => {
+					return {
+						x: Math.floor(Math.parseInt(node.data.id) / 10) * 20,
+						y: (Math.parseInt(node.data.id) % 10 ) * 20
+					}
+				})
 
 				// demo your collection ext
 				cy.elements().fisheye( /* args... */ );

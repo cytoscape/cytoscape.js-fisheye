@@ -1,11 +1,9 @@
 // focus node means the point of focus in the fisheye view
 
 
-const distortDimension = (dim, opts) => {
-  const distortionFactor = opts.distortionFactor;
-  return ( ( distortionFactor + 1) * dim ) / ( ( distortionFactor * dim) + 1 );
+const distort = (val, distortionFactor) => {
+  return ( ( distortionFactor + 1) * val ) / ( ( distortionFactor * val) + 1 );
 };
-
 
 // The position of a node for a fisheye view is a function of the node's position
 // as well as the focus node's position
@@ -37,7 +35,7 @@ const visualWorth = (node, focusNode, opts) => {
 };
 
 
-module.exports = function(){
+module.exports = function (opts) {
   let eles = this;
   let cy = this.cy();
 
@@ -47,9 +45,25 @@ module.exports = function(){
   const focusNode = eles[0];
   const focusNodeComplement = focusNode.absoluteComplement();
 
-  const renderedBB = cy.nodes().renderedBoundingBox({includeLabels: false});
-  const dMaxX = Math.abs(focusNode.renderedPosition().x - renderedBB.x2);
+  const viewportBB = cy.nodes().renderedBoundingBox({includeLabels: false});
 
+  cy.nodes().difference(focusNode).forEach((node) => {
+    const focusRPos = focusNode.renderedPosition();
+    const nodeRPos = node.renderedPosition();
+    const dMaxX = Math.abs(focusRPos.x - viewportBB.x2);
+    const dNormX = Math.abs(focusRPos.x - nodeRPos.x);
+    const dNormY = Math.abs(focusRPos.y - nodeRPos.y);
+    const dMaxY = Math.abs(focusRPos.y - viewportBB.y2);
 
+    const distortedFactorX = distort(dNormX / dMaxX, 1);
+    const distortedFactorY = distort(dNormY / dMaxY, 1);
+
+    const newPos =  {
+      x: ( distortedFactorX * dMaxX ) + focusRPos.x,
+      y: ( distortedFactorY * dMaxY ) + focusRPos.y
+    };
+
+    node.position(newPos);
+  });
   return this; // chainability
 };
