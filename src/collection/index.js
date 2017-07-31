@@ -72,11 +72,13 @@ module.exports = function (opts) {
   if (eles.empty()) { return }
 
   const focusNode = eles[0];
-  const fishEyeBB = cy.nodes().renderedBoundingBox({includeLabels: false});
+  const fisheyeCollection = focusNode.isChild() ? focusNode.siblings() : cy.nodes();
+  const fisheyeBB = fisheyeCollection.renderedBoundingBox({});
 
-  cy.nodes().difference(focusNode).forEach((node) => {
+  fisheyeCollection.difference(focusNode).forEach((node) => {
 
-    const newPos = fePosition(node, focusNode, fishEyeBB, opts);
+    const newPos = fePosition(node, focusNode, fisheyeBB, opts);
+
     if (opts && opts.animate) {
       node.animate({
         renderedPosition: newPos,
