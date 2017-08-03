@@ -58,9 +58,12 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## API
 
-TODO describe the API of the extension here.
+Fisheye positions nodes relative to a ```focus node```.
 
-
+Example usage:
+```js
+focusNode.fisheye({ animate: true })
+```
 ## Build targets
 
 * `npm run test` : Run Mocha tests in `./test`
