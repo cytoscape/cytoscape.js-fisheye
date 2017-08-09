@@ -8,6 +8,7 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
 		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
@@ -76,7 +77,7 @@
 						{
 							selector: 'edge',
 							style: {
-								'curve-style': 'bezer',
+								'curve-style': 'bezier',
 								'target-arrow-shape': 'triangle'
 							}
 						}
@@ -85,26 +86,40 @@
 					elements: elements()
 				});
 
-				var reposition = function () {
-					cy.nodes().positions((node) => {
-						return {
-							x: Math.floor(parseInt(node.data('id') % 10)) * 100,
-							y: Math.floor(parseInt(node.data('id') / 10 )) * 100
-						};
-					});
-				};
-				reposition();
-
-				cy.on('tapstart', 'node', function (evt) {
-					evt.target.fisheye({
-						animate: true
-					});
+				const lodash = _.noConflict();
+				cy.nodes().positions((node) => {
+					return {
+						x: Math.floor(parseInt(node.data('id') % 10)) * 100,
+						y: Math.floor(parseInt(node.data('id') / 10 )) * 100
+					};
+				});
+				cy.fit({padding: 100});
+				cy.nodes().forEach(node => {
+					node.scratch('_fisheye', {});
+					node.scratch('_fisheye').x = node.position('x');
+					node.scratch('_fisheye').y = node.position('y');
 				});
 
-				cy.on('tapend', 'node', function (evt) {
-					reposition();
-				});
+				let fisheyeFlag = false;
+				cy.on('mouseover', 'node', lodash.debounce(function (evt) {
+					const position = evt.position;
+					if (!fisheyeFlag) {
+						cy.fisheye(position, {radius: 200, distortion: 1});
+						fisheyeFlag = true;
+					}
+				}, 250));
 
+				cy.on('mouseout', '*', lodash.debounce(function (evt) {
+					if (fisheyeFlag) {
+						cy.nodes().forEach(node => {
+							node.animate({
+								position: node.scratch('_fisheye')
+							});
+
+						});
+						fisheyeFlag = false;
+					}
+				}, 250));
 			});
 		</script>
 	</head>
