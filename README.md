@@ -15,7 +15,6 @@ of the ACM 1994;37(12):73–84.
 ## Dependencies
 
  * Cytoscape.js ^3.0.0
- * <List your dependencies here please>
 
 
 ## Usage instructions
@@ -58,15 +57,34 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## API
 
-Fisheye positions nodes relative to a ```focus node```.
+The fisheye layout positions nodes relative to a ```focus``` position.
 
-Example usage:
 ```js
-  cy.fisheye(node.position(), {distortion: 2, animate: true});
-  
-  // or
-   
-  cy.fisheye({x: 100, y: 100})
+const options = {
+  // fisheye
+  focus: {x: 0, y: 0}, // the model position which the fisheye view will be based on
+  distortionFactor: 1, // how much nodes are distorted relative to their position from the focus
+  fisheyeBoundingBox: undefined, // restrict which nodes will be affected by the fisheye view.  Default is the boundingbox of the given elements
+
+  // animation
+  animate: undefined, // whether or not to animate the layout
+  animationDuration: undefined, // duration of animation in ms, if enabled
+  animationEasing: undefined, // easing of animation, if enabled
+
+  // viewport
+  pan: undefined, // pan the graph to the provided position, given as { x, y }
+  zoom: undefined, // zoom level as a positive number to set after animation
+  fit: undefined, // fit the viewport to the repositioned nodes, overrides pan and zoom
+
+  // modifications
+  padding: undefined, // padding around layout
+  boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+  spacingFactor: undefined, // a positive value which adjusts spacing between nodes (>1 means greater than usual spacing)
+
+  // layout event callbacks
+  ready: function(){}, // on layoutready
+  stop: function(){} // on layoutstop
+};
 ```
 ## Build targets
 
