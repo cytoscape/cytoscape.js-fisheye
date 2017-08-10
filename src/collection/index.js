@@ -1,8 +1,17 @@
-const defaultOpts = {
-  animate: false,
-  distortionFactor: 1
+const feSize = (focusPos, node, globalBB, opts) => {
+  const nodePos = node.position();
 };
- 
+
+const maxDetail = (focusPos, node, opts) => {
+  const nodeFisheyeSize = feSize(node, focusPos, opts);
+  const maxDetail = opts.maxNodeDetail;
+
+};
+
+const visualWorth = (focusPos, node, opts) => {
+  const nodePos = node.position();
+};
+
 
 const distort = (val, distortionFactor) => {
   return ( ( distortionFactor + 1) * val ) / ( ( distortionFactor * val) + 1 );
@@ -14,20 +23,19 @@ const distort = (val, distortionFactor) => {
 // focusNode - the node that is the focus of the fisheye view
 // globalBB - the bounding box for the fisheye view 
 const fePosition = (focusPos, node, globalBB, opts) => {
-  const nodeRPos = node.position();
-
-  let dNormX = Math.abs((nodeRPos.x - focusPos.x));
-  let dNormY = Math.abs((nodeRPos.y - focusPos.y));
+  const nodePos = node.position();
+  let dNormX = Math.abs((nodePos.x - focusPos.x));
+  let dNormY = Math.abs((nodePos.y - focusPos.y));
 
   let dMaxX;
-  if (nodeRPos.x <= focusPos.x) {
+  if (nodePos.x <= focusPos.x) {
     dMaxX = focusPos.x - globalBB.x1;
   } else {
     dMaxX = globalBB.x2 - focusPos.x;
   }
 
   let dMaxY;
-  if (nodeRPos.y <= focusPos.y) {
+  if (nodePos.y <= focusPos.y) {
     dMaxY = focusPos.y - globalBB.y1;
   } else {
     dMaxY = globalBB.y2 - focusPos.y;
@@ -36,37 +44,17 @@ const fePosition = (focusPos, node, globalBB, opts) => {
   const distortedFactorX = distort(dNormX / dMaxX, opts.distortion);
   const distortedFactorY = distort(dNormY / dMaxY, opts.distortion);
 
-  let x = focusPos.x > nodeRPos.x ? focusPos.x - ( distortedFactorX * dMaxX ) : focusPos.x + ( distortedFactorX * dMaxX );
-  let y = focusPos.y > nodeRPos.y ? focusPos.y - ( distortedFactorY * dMaxY ) : focusPos.y + ( distortedFactorY * dMaxY );
+  let x = focusPos.x > nodePos.x ? focusPos.x - ( distortedFactorX * dMaxX ) : focusPos.x + ( distortedFactorX * dMaxX );
+  let y = focusPos.y > nodePos.y ? focusPos.y - ( distortedFactorY * dMaxY ) : focusPos.y + ( distortedFactorY * dMaxY );
 
   return {
     x: x,
     y: y
   };
-};
-
-const feSize = (node, focusNode, opts) => {
-  const nodeSize = node.layoutDimenions({
-    nodeDimensionsIncludeLabels: false
-  });
-  const nodePos = node.position();
-
-  const focusPos = focusNode.position();
-};
-
-const maxDetail = (node, focusNode, opts) => {
-  const nodeFisheyeSize = feSize(node, focusNode, opts);
-  const maxDetail = opts.maxNodeDetail;
 
 };
 
-const visualWorth = (node, focusNode, opts) => {
-  const nodePos = node.position();
-  const focusPos = focusNode.position();
-
-};
-
-const fisheyePosition = (focusPos, node, radius, distortion) => {
+const radialFEPosition = (focusPos, node, radius, distortion) => {
   const nodePos = node.position();
   node.data('fisheye.pos-before', nodePos);
 
@@ -96,14 +84,15 @@ module.exports = function (focusPos, opts) {
 
   cy.nodes().forEach(node => {
     const fePos = fePosition(focusPos, node, cy.nodes().boundingBox(), opts);
-    // node.position(fePos);
-    node.animate({
-      position: fePos,
-      // queue: true,
-      duration: 100
-    });
 
-    // node.position(fisheyePosition(focusPos, node, opts.radius, opts.distortion));
+    if (opts.animate) {
+      node.animate({
+        position: fePos,
+        duration: 100
+      });
+    } else {
+      node.position(fePos);
+    }
   });
   return this; // chainability
 };

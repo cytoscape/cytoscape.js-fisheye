@@ -8,7 +8,7 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
 		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
+		<script src="https://unpkg.com/lodash@4.17.4/lodash.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
@@ -102,20 +102,23 @@
 
 				let fisheyeFlag = false;
 				cy.on('mouseover', 'node', lodash.debounce(function (evt) {
-					const position = evt.position;
+					const position = evt.target.position();
 					if (!fisheyeFlag) {
-						cy.fisheye(position, {radius: 200, distortion: 1});
 						fisheyeFlag = true;
+						cy.nodes().layout({
+							name: 'fisheye',
+							focus: position,
+							animate: true
+						}).run()
 					}
 				}, 250));
 
-				cy.on('mouseout', '*', lodash.debounce(function (evt) {
+				cy.on('mouseout', 'node', lodash.debounce(function (evt) {
 					if (fisheyeFlag) {
 						cy.nodes().forEach(node => {
 							node.animate({
 								position: node.scratch('_fisheye')
 							});
-
 						});
 						fisheyeFlag = false;
 					}
