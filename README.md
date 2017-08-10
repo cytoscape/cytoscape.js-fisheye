@@ -62,7 +62,11 @@ Fisheye positions nodes relative to a ```focus node```.
 
 Example usage:
 ```js
-focusNode.fisheye({ animate: true })
+  cy.fisheye(node.position(), {distortion: 2, animate: true});
+  
+  // or
+   
+  cy.fisheye({x: 100, y: 100})
 ```
 ## Build targets
 
