@@ -28,31 +28,6 @@ const defaults = Object.freeze({
   stop: function(){} // on layoutstop
 });
 
-// class Layout {
-//   constructor( options ){
-//     this.options = assign({}, defaults, options);
-//   }
-
-//   run(){
-//     let layout = this;
-//     let options = this.options;
-//     let cy = options.cy;
-//     let eles = options.eles;
-//     let nodes = eles.nodes();
-
-//     const focusPos = options.focusPos;
-//     const fisheyeBB = options.fisheyeBoundingBox || eles.boundingBox();
-//     const distortionFactor = options.distortionFactor;
-
-//     const nodePosFn = function (ele, i) {
-//       return fisheye(focusPos, ele, fisheyeBB, distortionFactor);
-//     };
-    
-//     // .layoutPositions() automatically handles the layout busywork for you
-//     nodes.layoutPositions( layout, options, nodePosFn );
-//   }
-// }
-
 function Layout ( options ) {
   this.options = assign( {}, defaults, options);
 }
@@ -83,8 +58,5 @@ Layout.prototype.stop = function(){
 Layout.prototype.destroy = function(){
   return this; // chaining
 };
-
-
-
 
 module.exports = Layout;
