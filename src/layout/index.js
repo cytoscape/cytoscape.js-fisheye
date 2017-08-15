@@ -28,35 +28,30 @@ const defaults = Object.freeze({
   stop: function(){} // on layoutstop
 });
 
-function Layout ( options ) {
-  this.options = assign( {}, defaults, options);
+class Layout {
+  constructor( options ){
+    this.options = assign({}, defaults, options);
+  }
+
+  run(){
+    let layout = this;
+    let options = this.options;
+    let cy = options.cy;
+    let eles = options.eles;
+    let nodes = eles.nodes();
+
+    const focusPos = options.focus;
+    const fisheyeBB = options.fisheyeBoundingBox || eles.boundingBox();
+    const distortionFactor = options.distortionFactor;
+
+    const fisheyePos = function (ele) {
+      const fePos = fisheye(focusPos, ele, fisheyeBB, distortionFactor);
+      return fePos;
+    };
+    
+    // .layoutPositions() automatically handles the layout busywork for you
+    nodes.filter(n => !n.isParent()).layoutPositions( layout, options, fisheyePos );
+  }
 }
-
-Layout.prototype.run = function(){
-  let layout = this;
-  let options = this.options;
-  let cy = options.cy;
-  let eles = options.eles;
-  let nodes = eles.nodes();
-
-  const focusPos = options.focus;
-  const fisheyeBB = options.fisheyeBoundingBox || eles.boundingBox();
-  const distortionFactor = options.distortionFactor;
-
-  const fisheyePos = function (ele) {
-    return fisheye(focusPos, ele, fisheyeBB, distortionFactor);
-  };
-  
-  // .layoutPositions() automatically handles the layout busywork for you
-  nodes.filter(n => !n.isParent()).layoutPositions( layout, options, fisheyePos );
-};
-
-Layout.prototype.stop = function(){
-  return this; // chaining
-};
-
-Layout.prototype.destroy = function(){
-  return this; // chaining
-};
 
 module.exports = Layout;
