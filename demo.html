@@ -1,0 +1,137 @@
+<!DOCTYPE>
+
+<html>
+
+	<head>
+		<title>cytoscape-fisheye.js demo</title>
+
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+		<script src="https://unpkg.com/lodash@4.17.4/lodash.min.js"></script>
+
+		<!-- for testing with local version of cytoscape.js -->
+		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+		<script src="cytoscape-fisheye.js"></script>
+
+		<style>
+			body {
+				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+				font-size: 14px;
+			}
+
+			#cy {
+				position: absolute;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				right: 0;
+				z-index: 999;
+			}
+
+			h1 {
+				opacity: 0.5;
+				font-size: 1em;
+				font-weight: bold;
+			}
+		</style>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function(){
+
+				var elements = function () {
+					var nodes = [];
+					var edges = [];
+					for ( var i = 0; i < 100; i++ ) {
+						nodes.push({data: { id: i.toString(), name: i.toString() }});
+					}
+
+					for ( var j = 99; 0 < j; j-- ) {
+
+						if (j % 10 !== 0) {
+							edges.push({data: {target: nodes[j].data.id, source: nodes[j-1].data.id }});
+						}
+						if (10 <= j) {
+							edges.push({data: {target: nodes[j-10].data.id, source: nodes[j].data.id}});
+						}
+					}
+
+					return {
+						nodes: nodes,
+						edges: edges
+					};
+				};
+
+				var cy = window.cy = cytoscape({
+					container: document.getElementById('cy'),
+
+					style: [
+						{
+							selector: 'node',
+							style: {
+								'content': 'data(name)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+								'curve-style': 'bezier',
+								'target-arrow-shape': 'triangle'
+							}
+						}
+					],
+
+					elements: elements()
+				});
+
+				const lodash = _.noConflict();
+				cy.nodes().positions((node) => {
+					return {
+						x: Math.floor(parseInt(node.data('id') % 10)) * 100,
+						y: Math.floor(parseInt(node.data('id') / 10 )) * 100
+					};
+				});
+				cy.fit({padding: 100});
+				cy.nodes().forEach(node => {
+					node.scratch('_fisheye', {});
+					node.scratch('_fisheye').x = node.position('x');
+					node.scratch('_fisheye').y = node.position('y');
+				});
+
+				let fisheyeFlag = false;
+				cy.on('mouseover', 'node', lodash.debounce(function (evt) {
+					const position = evt.target.position();
+					if (!fisheyeFlag) {
+						fisheyeFlag = true;
+						cy.nodes().layout({
+							name: 'fisheye',
+							focus: position,
+							animate: true
+						}).run()
+					}
+				}, 250));
+
+				cy.on('mouseout', 'node', lodash.debounce(function (evt) {
+					if (fisheyeFlag) {
+						cy.nodes().forEach(node => {
+							node.animate({
+								position: node.scratch('_fisheye')
+							});
+						});
+						fisheyeFlag = false;
+					}
+				}, 250));
+			});
+		</script>
+	</head>
+
+	<body>
+		<h1>cytoscape-fisheye demo</h1>
+
+		<div id="cy"></div>
+
+	</body>
+
+</html>
